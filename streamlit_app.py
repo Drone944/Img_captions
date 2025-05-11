@@ -2,24 +2,38 @@ import requests
 from PIL import Image
 from transformers import BlipProcessor, BlipForConditionalGeneration
 import streamlit as st
-import torch  # Add explicit torch import
+import torch
 
 @st.cache_resource
 def load_model():
     processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-    # Use device_map="auto" to properly handle meta tensors
+    
+    # Option 1: Load with CPU offload to avoid meta tensor issues
     model = BlipForConditionalGeneration.from_pretrained(
-        "Salesforce/blip-image-captioning-base", 
-        device_map="auto",
-        torch_dtype=torch.float32  # Explicitly use float32 to avoid precision issues
+        "Salesforce/blip-image-captioning-base",
+        torch_dtype=torch.float32,  # Use float32 precision
+        low_cpu_mem_usage=True      # This enables better memory handling
     )
+    
+    # Explicitly move to CPU without using to_empty() since that's causing issues
+    # We'll avoid meta tensors entirely with this approach
+    model = model.to("cpu")
+    
     return processor, model
 
 st.title("🖼️ Img_captions")
 
-# Try loading the model with exception handling
+# Add a warning about potential dependencies
+st.warning("""
+If you encounter errors about meta tensors or accelerate, you may need to install additional dependencies:
+```
+pip install accelerate
+```
+""")
+
 try:
     processor, model = load_model()
+    st.success("✅ Model loaded successfully!")
 except Exception as e:
     st.error(f"Failed to load model: {e}")
     st.stop()
@@ -40,7 +54,7 @@ elif option == "Paste image URL":
     if img_url:
         try:
             response = requests.get(img_url, stream=True)
-            response.raise_for_status()  # Will raise an exception for 4XX/5XX responses
+            response.raise_for_status()
             image = Image.open(response.raw).convert('RGB')
         except Exception as e:
             st.error(f"Failed to load image from URL: {e}")
@@ -52,8 +66,8 @@ if image:
         try:
             inputs = processor(image, return_tensors="pt")
             
-            # Handle device placement - let the model's device_map handle it
-            # No need to explicitly move inputs with device_map="auto"
+            # Keep everything on CPU to avoid device mismatch issues
+            inputs = {k: v.to("cpu") for k, v in inputs.items()}
             
             out = model.generate(**inputs)
             txt_out = processor.decode(out[0], skip_special_tokens=True)
