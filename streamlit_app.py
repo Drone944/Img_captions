@@ -35,8 +35,12 @@ if image:
     with st.spinner("Generating caption..."):
         inputs = processor(image, return_tensors="pt").to("cpu")
 
-        out = model.generate(**inputs)
-        txt_out = processor.decode(out[0], skip_special_tokens=True)
+        print(type(out))
+
+        if isinstance(out, torch.Tensor):
+            txt_out = processor.decode(out[0] if out.dim() > 1 else out, skip_special_tokens=True)
+        elif hasattr(out, "sequences"):
+            txt_out = processor.decode(out.sequences[0], skip_special_tokens=True)
 
     st.subheader("📝 Caption:")
     st.success(txt_out)
