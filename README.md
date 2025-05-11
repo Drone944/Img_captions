@@ -19,3 +19,6 @@ Run the application.
 ```
 streamlit run streamlit_app.py
 ```
+
+## Example Usage
+![image](https://github.com/user-attachments/assets/7728e224-b3ad-4994-8693-7dbde7c2a5d0)
