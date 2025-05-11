@@ -6,7 +6,7 @@ import streamlit as st
 @st.cache_resource
 def load_model():
     processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-    model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to_empty("cpu")
+    model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to_empty(device="cpu")
 
     return processor, model
 
