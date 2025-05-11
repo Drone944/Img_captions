@@ -33,7 +33,7 @@ if image:
     st.image(image, caption="Uploaded Image", use_container_width=True)
 
     with st.spinner("Generating caption..."):
-        inputs = processor(image, return_tensors="pt").to_empty(device="cpu")
+        inputs = processor(image, return_tensors="pt").to("cpu")
 
         out = model.generate(**inputs)
         txt_out = processor.decode(out[0], skip_special_tokens=True)
