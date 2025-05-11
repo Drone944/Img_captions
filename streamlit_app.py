@@ -7,12 +7,12 @@ import torch  # Add explicit torch import
 @st.cache_resource
 def load_model():
     processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-    model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
-    # Use a safer way to initialize the model
-    if torch.cuda.is_available():
-        model = model.to("cuda")
-    else:
-        model = model.to("cpu")
+    # Use device_map="auto" to properly handle meta tensors
+    model = BlipForConditionalGeneration.from_pretrained(
+        "Salesforce/blip-image-captioning-base", 
+        device_map="auto",
+        torch_dtype=torch.float32  # Explicitly use float32 to avoid precision issues
+    )
     return processor, model
 
 st.title("🖼️ Img_captions")
@@ -52,9 +52,8 @@ if image:
         try:
             inputs = processor(image, return_tensors="pt")
             
-            # Move inputs to the same device as model
-            device = next(model.parameters()).device
-            inputs = {k: v.to(device) for k, v in inputs.items()}
+            # Handle device placement - let the model's device_map handle it
+            # No need to explicitly move inputs with device_map="auto"
             
             out = model.generate(**inputs)
             txt_out = processor.decode(out[0], skip_special_tokens=True)
