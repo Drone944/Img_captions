@@ -3,9 +3,11 @@ from PIL import Image
 from transformers import BlipProcessor, BlipForConditionalGeneration
 import streamlit as st
 
+@st.cache_resource
 def load_model():
     processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-    model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
+    model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to("cuda")
+
     return processor, model
 
 processor, model = load_model()
@@ -28,7 +30,7 @@ elif option == "Paste image URL":
             st.error(f"Failed to load image from URL:  {e}")
 
 if image:
-    st.image(image, caption="Uploaded Image", use_container_width=True)
+    st.image(image, caption="Uploaded Image", use_container_width=True).to("cuda")
 
     with st.spinner("Generating caption..."):
         inputs = processor(image, return_tensors="pt")
