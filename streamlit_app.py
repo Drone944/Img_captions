@@ -35,6 +35,9 @@ if image:
     with st.spinner("Generating caption..."):
         inputs = processor(image, return_tensors="pt").to("cpu")
 
+        out = model.generate(**inputs)
+        #txt_out = processor.decode(out[0], skip_special_tokens=True)
+        
         print(type(out))
 
         if isinstance(out, torch.Tensor):
