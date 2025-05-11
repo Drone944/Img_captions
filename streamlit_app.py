@@ -6,7 +6,7 @@ import streamlit as st
 @st.cache_resource
 def load_model():
     processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-    model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to("meta")
+    model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to("cpu")
 
     return processor, model
 
@@ -33,7 +33,7 @@ if image:
     st.image(image, caption="Uploaded Image", use_container_width=True)
 
     with st.spinner("Generating caption..."):
-        inputs = processor(image, return_tensors="pt").to("meta")
+        inputs = processor(image, return_tensors="pt").to(model.device)
 
         out = model.generate(**inputs)
         txt_out = processor.decode(out[0], skip_special_tokens=True)
