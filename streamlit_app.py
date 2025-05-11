@@ -30,10 +30,10 @@ elif option == "Paste image URL":
             st.error(f"Failed to load image from URL:  {e}")
 
 if image:
-    st.image(image, caption="Uploaded Image", use_container_width=True).to("meta")
+    st.image(image, caption="Uploaded Image", use_container_width=True)
 
     with st.spinner("Generating caption..."):
-        inputs = processor(image, return_tensors="pt")
+        inputs = processor(image, return_tensors="pt").to("meta")
 
         out = model.generate(**inputs)
         txt_out = processor.decode(out[0], skip_special_tokens=True)
