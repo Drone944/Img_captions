@@ -1,6 +1,10 @@
 # Img_captions
 A Streamlit app using Salesforce's BLIP model to generate captions from image uploads or URLs.
 
+Try it out: https://imgcaptions.streamlit.app/
+
+---
+
 ## Usage
 
 Create a python virtual environment.
